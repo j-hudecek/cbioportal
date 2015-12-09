@@ -44,6 +44,7 @@ import java.util.Set;
 import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
 import org.mskcc.cbio.portal.model.CanonicalGene;
 import org.mskcc.cbio.portal.model.ExtendedMutation;
+import org.mskcc.cbio.portal.util.GlobalProperties;
 
 /**
  * Filter mutations as they're imported into the CGDS dbms.
@@ -117,6 +118,8 @@ public class MutationFilter {
     * @return true if the mutation should be imported into the dbms
     */
    public boolean acceptMutation(ExtendedMutation mutation) {
+       if (!GlobalProperties.getMutationUseFilter())
+           return true;
       this.decisions++;
       
       /*

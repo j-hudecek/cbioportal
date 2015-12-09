@@ -182,7 +182,9 @@ public class GlobalProperties {
     public static final String MYCANCERGENOME_URL = "mycancergenome.url";
     public static final String ONCOKB_GENE_STATUS = "oncokb.geneStatus";
     public static final String SHOW_HOTSPOT = "show.hotspot";
-    
+
+    public static final String MUTATION_USE_FILTER = "mutation.useFilter";
+
     public static final String RECACHE_STUDY_AFTER_UPDATE = "recache_study_after_update";
     
     private static Log LOG = LogFactory.getLog(GlobalProperties.class);
@@ -667,5 +669,13 @@ public class GlobalProperties {
             return false;
         }
         return Boolean.parseBoolean(recacheStudyAfterUpdate);
+    }
+
+    public static boolean getMutationUseFilter() {
+        String mutationUseFilter = properties.getProperty(MUTATION_USE_FILTER);
+        if (mutationUseFilter==null || mutationUseFilter.isEmpty()) {
+            return true;
+        }
+        return Boolean.parseBoolean(mutationUseFilter);
     }
 }
