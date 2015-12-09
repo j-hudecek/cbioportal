@@ -159,7 +159,7 @@ var StudyViewProxy = (function() {
                 for(var i= 0; i < a1[0].attributes.length; i++){
                     var caseAttr = new CaseAttr();
                     caseAttr.attr_id =  a1[0].attributes[i].attr_id.toUpperCase();
-                    if(! a1[0].attributes[i].hasOwnProperty('display_name') ||  a1[0].attributes[i].display_name){
+                    if(! a1[0].attributes[i].hasOwnProperty('display_name') ||  a1[0].attributes[i].display_name == null  ||  a1[0].attributes[i].display_name.trim() ==""){
                         caseAttr.display_name =  a1[0].attributes[i].attr_id;
                     }
                     caseAttr.display_name = toPascalCase(caseAttr.display_name);
@@ -438,7 +438,7 @@ var StudyViewProxy = (function() {
         var  _arr = [];
         if(sampleIds instanceof Array) {
             var sampleL = sampleIds.length;
-            
+
             for(var i = 0; i < sampleL; i++) {
                 if(sampleIdArrMapping.hasOwnProperty(sampleIds[i])) {
                     _arr.push(obtainDataObject.arr[sampleIdArrMapping[sampleIds[i]]]);
