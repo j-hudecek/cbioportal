@@ -268,13 +268,15 @@ public class PatientView extends HttpServlet {
         
 
         int patientId = samples.iterator().next().getInternalPatientId();
+        String stablePatientId = samples.iterator().next().getStableId(); 
+
         
         List<String> sampleIds = new ArrayList<String>(sampleIdSet);
         sortSampleIds(cancerStudy.getInternalId(), patientId, sampleIds);
         
         request.setAttribute(SAMPLE_ID, sampleIds);
         
-        request.setAttribute(QueryBuilder.HTML_TITLE, "Patient: "+StringUtils.join(sampleIds,","));
+        request.setAttribute(QueryBuilder.HTML_TITLE, "Patient: "+stablePatientId);
         
         String cancerStudyIdentifier = cancerStudy.getCancerStudyStableId();
 
