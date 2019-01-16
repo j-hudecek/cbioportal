@@ -36,7 +36,8 @@
 <head>
 <title><%= GlobalProperties.getTitle() %>::cBioPortal Login</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<%@ page import="org.mskcc.cbio.portal.util.DynamicState" %>
+<%@ page import="java.lang.Exception" %>
+<%@ page import="org.springframework.security.web.WebAttributes" %>
 <%@ page import="org.mskcc.cbio.portal.servlet.QueryBuilder" %>
 <%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
 <%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %>
@@ -96,9 +97,15 @@
             <p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
             <strong>You are not authorized to access this resource.&nbsp;
 
-              <% if (authenticationMethod.equals("googleplus")) { %>
-              You have attempted to log in as <%= DynamicState.INSTANCE.getFailedUser() %>.
-              <% } %>
+              <% if (authenticationMethod.equals("googleplus")) { 
+                    Exception lastException = (Exception) request.getSession().getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+                    if (lastException != null) {
+                        %>
+                            You have attempted to log in as <%= lastException.getMessage() %>.
+                        <%
+                    }
+                 }
+              %>
 
               <!-- removed hard-coded login contact html, instead calling GlobalProperties -->
               <%= GlobalProperties.getLoginContactHtml() %>
@@ -123,7 +130,7 @@
 
                 <fieldset id="login-fieldset">
                   <legend>
-                      Login to Portal:
+                      Login to cBioPortal:
                   </legend>
                   <p>
                     <span style="color:#666666;font-family:verdana,arial,sans-serif;font-size:145%">
@@ -155,10 +162,11 @@
                   </p>
                 </fieldset>
 
-                <% } else if (authenticationMethod.equals("googleplus")) { %>
+                <% } else if (authenticationMethod.equals("googleplus") || authenticationMethod.equals("social_auth")) { %>
                   <p>
                     <button onclick="window.location = 'auth/google'" style="padding: 0; border:none; background: none" >
-                      <IMG alt="Google+" src="images/login/googleplus_signin.png"  />
+                        <!-- we need alt != "Google+" because otherwise it gets hidden by Ad Block Plus chrome plugin -->
+                      <IMG alt="cBioPortal Google+ Log-in" src="images/login/googleplus_signin.png"  />
                     </button>
                   </p>
                 </fieldset>

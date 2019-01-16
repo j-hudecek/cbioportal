@@ -4,7 +4,9 @@ import org.cbioportal.model.Patient;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.PatientRepository;
 import org.cbioportal.service.PatientService;
+import org.cbioportal.service.StudyService;
 import org.cbioportal.service.exception.PatientNotFoundException;
+import org.cbioportal.service.exception.StudyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,22 +17,31 @@ public class PatientServiceImpl implements PatientService {
 
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private StudyService studyService;
     
     @Override
     public List<Patient> getAllPatientsInStudy(String studyId, String projection, Integer pageSize, Integer pageNumber, 
-                                               String sortBy, String direction) {
+                                               String sortBy, String direction) throws StudyNotFoundException {
+        
+        studyService.getStudy(studyId);
         
         return patientRepository.getAllPatientsInStudy(studyId, projection, pageSize, pageNumber, sortBy, direction);
     }
 
     @Override
-    public BaseMeta getMetaPatientsInStudy(String studyId) {
+    public BaseMeta getMetaPatientsInStudy(String studyId) throws StudyNotFoundException {
+
+        studyService.getStudy(studyId);
         
         return patientRepository.getMetaPatientsInStudy(studyId);
     }
 
     @Override
-    public Patient getPatientInStudy(String studyId, String patientId) throws PatientNotFoundException {
+    public Patient getPatientInStudy(String studyId, String patientId) throws PatientNotFoundException, 
+        StudyNotFoundException {
+
+        studyService.getStudy(studyId);
 
         Patient patient = patientRepository.getPatientInStudy(studyId, patientId);
 
@@ -52,4 +63,10 @@ public class PatientServiceImpl implements PatientService {
         
         return patientRepository.fetchMetaPatients(studyIds, patientIds);
     }
+
+	@Override
+	public List<Patient> getPatientsOfSamples(List<String> studyIds, List<String> sampleIds) {
+        
+        return patientRepository.getPatientsOfSamples(studyIds, sampleIds);
+	}
 }

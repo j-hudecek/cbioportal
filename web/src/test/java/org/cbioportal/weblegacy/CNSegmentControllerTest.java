@@ -34,7 +34,7 @@ package org.cbioportal.weblegacy;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.cbioportal.model.CNSegmentData;
+import org.mskcc.cbio.portal.model.CNSegmentData;
 import org.cbioportal.web.config.CustomObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -51,7 +51,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.cbioportal.service.CNSegmentService;
+import org.mskcc.cbio.portal.service.CNSegmentService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -101,7 +101,7 @@ public class CNSegmentControllerTest {
                 .param("chromosomes", "1,2")
                 .param("sampleIds", "TCGA-AG-3732-01"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json;charset=UTF-8"))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith("application/json;charset=UTF-8"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sample").value("TCGA-AG-3732-01"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].chr").value("7"))

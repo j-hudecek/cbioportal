@@ -29,13 +29,14 @@
  - You should have received a copy of the GNU Affero General Public License
  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --%>
-
 <%@ page import="org.mskcc.cbio.portal.servlet.QueryBuilder" %>
 <%@ page import="org.mskcc.cbio.portal.util.SessionServiceRequestWrapper" %>
 <%@ page import="org.mskcc.cbio.portal.servlet.ServletXssUtil" %>
 <%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
 <%@ page import="org.mskcc.cbio.portal.util.XssRequestWrapper" %>
 <%@ page import="org.codehaus.jackson.map.ObjectMapper" %>
+<%@ page import="org.apache.commons.lang.*" %>
+<%@ page import="java.util.List" %>
 
 <%
     String siteTitle = GlobalProperties.getTitle();
@@ -69,6 +70,8 @@
     boolean showMyCancerGenomeUrl = (Boolean) GlobalProperties.showMyCancerGenomeUrl();
     String oncokbGeneStatus = (String) GlobalProperties.getOncoKBGeneStatus();
     boolean showHotspot = (Boolean) GlobalProperties.showHotspot();
+    boolean showCivic = (Boolean) GlobalProperties.showCivic();
+    String civicUrl = (String) GlobalProperties.getCivicUrl();
     String userName = GlobalProperties.getAuthenticatedUserName();
 
     //are we using session service for bookmarking?
@@ -78,8 +81,22 @@
 
 <jsp:include page="global/header.jsp" flush="true"/>
 
+<script type="text/javascript" src="js/src/modifyQuery.js?<%=GlobalProperties.getAppVersion()%>"></script>
+
+<script>
+window.frontendConfig.historyType = 'memory';
+
+window.loadReactApp({ defaultRoute: 'blank' });
+    
+window.onReactAppReady(function(){
+    window.initModifyQueryComponent("modifyQueryButton", "querySelector");
+});
+</script>
+    
 <!-- for now, let's include these guys here and prevent clashes with the rest of the portal -->
 <%@ include file="oncokb/oncokb-card-template.html" %>
+<%@ include file="civic/civic-qtip-template.html" %>
+<script type="text/javascript" src="js/src/civic/civicservice.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/oncokb/OncoKBCard.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/oncokb/OncoKBConnector.js?<%=GlobalProperties.getAppVersion()%>"></script>
 <script type="text/javascript" src="js/src/mutation/data/Hotspots3dDataProxy.js?<%=GlobalProperties.getAppVersion()%>"></script>
@@ -95,6 +112,7 @@
 <link href="css/mutationMapper.min.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link href="css/crosscancer.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="css/oncokb.css?<%=GlobalProperties.getAppVersion()%>" />
+<link rel="stylesheet" type="text/css" href="css/civic.css?<%=GlobalProperties.getAppVersion()%>" />
 
 
 <%
@@ -121,17 +139,18 @@ if (sessionError != null) {  %>
 </p>
 <% } %>
 
-<table>
+    <table>
     <tr>
         <td>
 
             <div id="results_container">
-                <div id='modify_query' style='margin:20px;'>
-                    <button type='button' class='btn btn-primary' data-toggle='button' id='modify_query_btn'>
-                        Modify Query
-                    </button>
+                
+                <div id='modify_query'>
+                    <button id="modifyQueryButton" class="btn btn-primary" style="display: none;">Modify Query</button>
+                    <div id="querySelector" class="cbioportal-frontend"></div>
+                    <div id="reactRoot" class="hidden"></div>
                     <div style="margin-left:5px;display:none;" id="query_form_on_results_page">
-                        <%@ include file="query_form.jsp" %>
+                     
                     </div>
                 </div>
                 <div id="crosscancer-container">
@@ -142,10 +161,12 @@ if (sessionError != null) {  %>
         </td>
     </tr>
 </table>
-
+  
 <script>
     var oncokbGeneStatus = <%=oncokbGeneStatus%>;
     var showHotspot = <%=showHotspot%>;
+    var showCivic = <%=showCivic%>;
+    var civicUrl = '<%=civicUrl%>';
     var userName = '<%=userName%>';
     var enableMyCancerGenome = <%=showMyCancerGenomeUrl%>;
 
@@ -314,8 +335,10 @@ if (sessionError != null) {  %>
             <div id='session-id'></div>
             <br/>
 
+        <% if (GlobalProperties.getBitlyUser() != null) { %>
             If you would like to use a <b>shorter URL that will not break in email postings</b>, you can use the<br><a href='https://bitly.com/'>bitly.com</a> url below:<BR>
             <div id='bitly'></div>
+        <% } %>
         </div>
 
     </div>
@@ -399,6 +422,11 @@ if (sessionError != null) {  %>
     <span class='annotation-item chang_hotspot' alt='{{changHotspotAlt}}'>
         <img width='{{hotspotsImgWidth}}' height='{{hotspotsImgHeight}}' src='{{hotspotsImgSrc}}' alt='Recurrent Hotspot Symbol'>
     </span>
+    <% if (showCivic) { %>
+    <span class='annotation-item civic' proteinChange='{{proteinChange}}' geneSymbol='{{geneSymbol}}'>
+        <img width='14' height='14' src='images/ajax-loader.gif' alt='Civic Variant Entry'>
+    </span>
+    <% } %>
 </script>
 
 <script type="text/template" id="studies-with-no-data-tmpl">
@@ -438,6 +466,7 @@ if (sessionError != null) {  %>
                 clearInterval(tmp);
                 var cc_plots_tab_init = false;
                 if ($("#cc-plots").is(":visible")) {
+                     
                     _cc_plots_gene_list = _cc_plots_gene_list;
                     _.each(window.ccQueriedGenes, function (_gene) {
                         $("#cc_plots_gene_list").append(

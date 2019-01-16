@@ -358,14 +358,14 @@ public class TestImportTabDelimData {
             }
         }
         //check that we have 11 warning messages:
-        assertEquals(2, countDuplicatedRowWarnings);
+        assertEquals(4, countDuplicatedRowWarnings);
         assertEquals(3, countInvalidEntrez);
-        assertEquals(6, countSkippedWarnings);
+        assertEquals(4, countSkippedWarnings);
         
-        Set<Long> entrezGeneIds = DaoGeneticAlteration.getGenesIdInProfile(newGeneticProfileId);
+        Set<Integer> geneticEntityIds = DaoGeneticAlteration.getEntityIdsInProfile(newGeneticProfileId);
         // data will be loaded for 5 of the genes
-        assertEquals(5, entrezGeneIds.size());
-        HashMap<Long, HashMap<Integer, String>> dataMap = dao.getGeneticAlterationMap(newGeneticProfileId, entrezGeneIds);
+        assertEquals(5, geneticEntityIds.size());
+        HashMap<Integer, HashMap<Integer, String>> dataMap = dao.getGeneticAlterationMapForEntityIds(newGeneticProfileId, geneticEntityIds);
         assertEquals(5, dataMap.entrySet().size());
         
         int sampleId = DaoSample.getSampleByCancerStudyAndSampleId(studyId, "SAMPLE1").getInternalId();

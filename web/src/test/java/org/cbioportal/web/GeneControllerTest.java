@@ -74,13 +74,13 @@ public class GeneControllerTest {
 
         List<Gene> geneList = createGeneList();
 
-        Mockito.when(geneService.getAllGenes(Mockito.anyString(), Mockito.anyInt(), Mockito.anyInt(),
-                Mockito.anyString(), Mockito.anyString())).thenReturn(geneList);
+        Mockito.when(geneService.getAllGenes(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), 
+            Mockito.anyInt(), Mockito.anyString(), Mockito.anyString())).thenReturn(geneList);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/genes")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(ENTREZ_GENE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(HUGO_GENE_SYMBOL_1))
@@ -103,7 +103,7 @@ public class GeneControllerTest {
         BaseMeta baseMeta = new BaseMeta();
         baseMeta.setTotalCount(ENTREZ_GENE_ID_2);
 
-        Mockito.when(geneService.getMetaGenes()).thenReturn(baseMeta);
+        Mockito.when(geneService.getMetaGenes(Mockito.anyString())).thenReturn(baseMeta);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/genes")
                 .param("projection", "META"))
@@ -140,7 +140,7 @@ public class GeneControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/genes/test_gene_id")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.entrezGeneId").value(ENTREZ_GENE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.hugoGeneSymbol").value(HUGO_GENE_SYMBOL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.type").value(TYPE_1))
@@ -161,7 +161,7 @@ public class GeneControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/genes/test_gene_id/aliases")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0]").value(ALIAS_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[1]").value(ALIAS_2));
@@ -172,7 +172,8 @@ public class GeneControllerTest {
 
         List<Gene> geneList = createGeneList();
 
-        Mockito.when(geneService.fetchGenes(Mockito.anyListOf(String.class), Mockito.anyString())).thenReturn(geneList);
+        Mockito.when(geneService.fetchGenes(Mockito.anyListOf(String.class), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(geneList);
 
         List<String> geneIds = new ArrayList<>();
         geneIds.add(Integer.toString(ENTREZ_GENE_ID_1));
@@ -183,7 +184,7 @@ public class GeneControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(geneIds)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(ENTREZ_GENE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(HUGO_GENE_SYMBOL_1))
@@ -205,7 +206,8 @@ public class GeneControllerTest {
         BaseMeta baseMeta = new BaseMeta();
         baseMeta.setTotalCount(2);
 
-        Mockito.when(geneService.fetchMetaGenes(Mockito.anyListOf(String.class))).thenReturn(baseMeta);
+        Mockito.when(geneService.fetchMetaGenes(Mockito.anyListOf(String.class), Mockito.anyString()))
+            .thenReturn(baseMeta);
 
         List<String> geneIds = new ArrayList<>();
         geneIds.add(Integer.toString(ENTREZ_GENE_ID_1));

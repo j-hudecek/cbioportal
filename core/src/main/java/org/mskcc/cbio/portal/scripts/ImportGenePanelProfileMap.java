@@ -32,20 +32,21 @@
 
 package org.mskcc.cbio.portal.scripts;
 
+import org.mskcc.cbio.portal.dao.*;
+import org.mskcc.cbio.portal.model.*;
+import org.mskcc.cbio.portal.util.*;
+
 import java.io.*;
-import java.util.*;
-import org.cbioportal.persistence.GenePanelRepository;
-import org.cbioportal.model.*;
 import joptsimple.*;
-import org.mskcc.cbio.portal.util.ProgressMonitor;
-import org.mskcc.cbio.portal.util.SpringUtil;
+import java.util.*;
+import org.mskcc.cbio.portal.repository.GenePanelRepositoryLegacy;
 
 /**
  *
  * @author heinsz
  */
 public class ImportGenePanelProfileMap extends ConsoleRunnable {
-    
+
     private File genePanelProfileMapFile;
     private static Properties properties;
     private String cancerStudyStableId;
@@ -56,7 +57,7 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
             String progName = "ImportGenePanelProfileMap";
             String description = "Import gene panel profile map files.";
             // usage: --data <data_file.txt> --meta <meta_file.txt> --loadMode [directLoad|bulkLoad (default)] [--noprogress]
-	
+
             OptionParser parser = new OptionParser();
             OptionSpec<String> data = parser.accepts( "data",
                    "gene panel file" ).withRequiredArg().describedAs( "data_file.txt" ).ofType( String.class );
@@ -80,7 +81,7 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
                         progName, description, parser,
                         "'data' argument required.");
             }
-            
+
             if( options.has( meta ) ){
                 properties = new TrimmedProperties();
                 properties.load(new FileInputStream(options.valueOf(meta)));
@@ -89,22 +90,24 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
                 throw new UsageException(
                         progName, description, parser,
                         "'meta' argument required.");
-            }            
-            
-            SpringUtil.initDataSource();
+            }
+
             setFile(genePanel_f);
-            importData();            
+            SpringUtil.initDataSource();
+            importData();
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void importData() throws Exception {
+        List<Integer> samplesToDelete = new ArrayList();
+        List<Integer> profilesToDelete = new ArrayList();
         ProgressMonitor.setCurrentMessage("Reading data from:  " + genePanelProfileMapFile.getAbsolutePath());
-        GenePanelRepository genePanelRepository = SpringUtil.getGenePanelRepository();     
-        
+        GenePanelRepositoryLegacy genePanelRepositoryLegacy = (GenePanelRepositoryLegacy)SpringUtil.getApplicationContext().getBean("genePanelRepositoryLegacy");
+
         FileReader reader =  new FileReader(genePanelProfileMapFile);
         BufferedReader buff = new BufferedReader(reader);
         List<String> profiles = getProfilesLine(buff);
@@ -113,57 +116,62 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
             throw new RuntimeException("Missing SAMPLE_ID column in file " + genePanelProfileMapFile.getAbsolutePath());
         }
         profiles.remove((int)sampleIdIndex);
-        List<Integer> profileIds = getProfileIds(profiles, genePanelRepository);
-        
+        List<Integer> profileIds = getProfileIds(profiles, genePanelRepositoryLegacy);
+
         // delete if the profile mapping are there already
         for (Integer id : profileIds) {
-            if(genePanelRepository.sampleProfileMappingExistsByProfile(id)) {
-                genePanelRepository.deleteSampleProfileMappingByProfile(id);
+            if(genePanelRepositoryLegacy.sampleProfileMappingExistsByProfile(id)) {
+                genePanelRepositoryLegacy.deleteSampleProfileMappingByProfile(id);
             }
         }
 
         String line;
+        CancerStudy cs = DaoCancerStudy.getCancerStudyByStableId(cancerStudyStableId);
         while((line = buff.readLine()) != null) {
             List<String> data  = new LinkedList<>(Arrays.asList(line.split("\t")));
             String sampleId = data.get(sampleIdIndex);
-            Sample sample = genePanelRepository.getSampleByStableIdAndStudyId(sampleId, cancerStudyStableId);
-            
+
+            Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(cs.getInternalId() ,sampleId);
+
             data.remove((int)sampleIdIndex);
             for (int i = 0; i < data.size(); i++) {
-                List<GenePanel> genePanelList = genePanelRepository.getGenePanelByStableId(data.get(i));              
-                if (genePanelList != null && genePanelList.size() > 0) {       
-                    GenePanel genePanel = genePanelList.get(0);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("sampleId", sample.getInternalId());
-                    map.put("profileId", profileIds.get(i));
-                    map.put("panelId", genePanel.getInternalId());
-                    genePanelRepository.insertGenePanelSampleProfileMap(map);
+                GenePanel genePanel = DaoGenePanel.getGenePanelByStableId(data.get(i));             
+                if (genePanel != null) {
+                    if (DaoSampleProfile.sampleExistsInGeneticProfile(sample.getInternalId(), profileIds.get(i))) {
+                        samplesToDelete.add(sample.getInternalId());
+                        profilesToDelete.add(profileIds.get(i));                           
+                    }   
+                    DaoSampleProfile.addSampleProfile(sample.getInternalId(), profileIds.get(i), genePanel.getInternalId());
                 }
                 else {
                     ProgressMonitor.logWarning("No gene panel exists: " + data.get(i));
                 }
-            }            
-        }                                  
+            }
+        }
+        ProgressMonitor.setCurrentMessage("Deleting necessary records from sample_profile.");
+        DaoSampleProfile.deleteRecords(samplesToDelete, profilesToDelete);
+        ProgressMonitor.setCurrentMessage("Loading gene panel profile matrix data to database..");
+        MySQLbulkLoader.flushAll();
     }
-    
-    public List<String> getProfilesLine(BufferedReader buff) throws Exception {        
+
+    public List<String> getProfilesLine(BufferedReader buff) throws Exception {
         String line = buff.readLine();
         while(line.startsWith("#")) {
             line = buff.readLine();
         }
-        
+
         List<String> profiles = new LinkedList<>(Arrays.asList(line.split("\t")));
-        
+
         return profiles;
     }
-    
-    public List<Integer> getProfileIds(List<String> profiles, GenePanelRepository genePanelRepository) {
+
+    public List<Integer> getProfileIds(List<String> profiles, GenePanelRepositoryLegacy genePanelRepositoryLegacy) {
         List<Integer> geneticProfileIds = new LinkedList<>();
         for(String profile : profiles) {
             if (!profile.startsWith(cancerStudyStableId)) {
                 profile = cancerStudyStableId + "_" + profile;
             }
-            GeneticProfile geneticProfile = genePanelRepository.getGeneticProfileByStableId(profile);            
+            GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(profile);
             if (geneticProfile != null) {
                 geneticProfileIds.add(geneticProfile.getGeneticProfileId());
             }
@@ -173,13 +181,13 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
         }
         return geneticProfileIds;
     }
-    
-            
+
+
     public void setFile(File genePanelProfileMapFile)
     {
         this.genePanelProfileMapFile = genePanelProfileMapFile;
-    }    
-    
+    }
+
     /**
      * Makes an instance to run with the given command line arguments.
      *
@@ -188,7 +196,7 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
     public ImportGenePanelProfileMap(String[] args) {
         super(args);
     }
-    
+
     /**
      * Runs the command as a script and exits with an appropriate exit code.
      *
