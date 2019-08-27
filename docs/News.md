@@ -1,5 +1,33 @@
+## August 13, 2019
+*   **Added data** consisting of 295 samples from 3 studies:
+    *  [Pediatric Preclinical Testing Consortium (PPTC, 2019)](https://www.cbioportal.org/study/summary?id=pptc_2019) *261 samples*
+    *  [Non-small cell lung cancer (MSK, Science 2015)](https://www.cbioportal.org/study/summary?id=nsclc_mskcc_2015) *16 samples*
+    *  [Prostate Cancer (MSK, 2019)](https://www.cbioportal.org/study/summary?id=prad_msk_2019) *18 samples*
+
+## July 26, 2019
+*   **Added data** consisting of 35 samples from 1 study:
+    *  [Clear Cell Renal Cell Carcinoma (DFCI, Science 2019)](https://www.cbioportal.org/study/summary?id=ccrcc_dfci_2019) *35 samples*
+*   Added Hypoxia data for:
+    *  [Breast Invasive Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=brca_tcga_pan_can_atlas_2018)
+    *  [Colorectal Adenocarcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=coadread_tcga_pan_can_atlas_2018)
+    *  [Cervical Squamous Cell Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=cesc_tcga_pan_can_atlas_2018)
+    *  [Glioblastoma Multiforme (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=gbm_tcga_pan_can_atlas_2018)
+    *  [Head and Neck Squamous Cell Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=hnsc_tcga_pan_can_atlas_2018)
+    *  [Kidney Renal Clear Cell Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=kirc_tcga_pan_can_atlas_2018)
+    *  [Kidney Renal Papillary Cell Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=kirp_tcga_pan_can_atlas_2018)
+    *  [Brain Lower Grade Glioma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=lgg_tcga_pan_can_atlas_2018)
+    *  [Liver Hepatocellular Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=lihc_tcga_pan_can_atlas_2018)
+    *  [Lung Adenocarcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=luad_tcga_pan_can_atlas_2018)
+    *  [Lung Squamous Cell Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=lusc_tcga_pan_can_atlas_2018)
+    *  [Ovarian Serous Cystadenocarcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=ov_tcga_pan_can_atlas_2018)
+    *  [Pancreatic Adenocarcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=paad_tcga_pan_can_atlas_2018)
+    *  [Pheochromocytoma and Paraganglioma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=pcpg_tcga_pan_can_atlas_2018)
+    *  [Prostate Adenocarcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=prad_tcga_pan_can_atlas_2018)
+    *  [Skin Cutaneous Melanoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=skcm_tcga_pan_can_atlas_2018)
+    *  [Thyroid Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=thca_tcga_pan_can_atlas_2018)
+    *  [Uterine Corpus Endometrial Carcinoma (TCGA, PanCancer Atlas)](https://www.cbioportal.org/study/summary?id=ucec_tcga_pan_can_atlas_2018)
 ## July 24, 2019
-*   **Added data** consistng of 151 samples from 1 study:
+*   **Added data** consisting of 151 samples from 1 study:
     *  [Myeloproliferative Neoplasms (CIMR, NEJM 2013)](https://www.cbioportal.org/study/summary?id=mpn_cimr_2013) *151 samples*
 ## July 13, 2019
  *   **Public Release 6.1 of AACR Project GENIE:**
